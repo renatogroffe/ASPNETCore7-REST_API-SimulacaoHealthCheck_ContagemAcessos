@@ -19,12 +19,7 @@ public class StatusController : ControllerBase
     [HttpGet]
     public ActionResult<StatusApi> Get()
     {
-        var status = new StatusApi
-        {
-            Healthy = _healthy,
-            Mensagem = _healthy ? "OK" : "Unhealthy"
-        };
-
+        var status = GetCurrentStatusApplication();
         if (_healthy)
         {
             _logger.LogInformation("Simulacao status = OK");
@@ -41,18 +36,28 @@ public class StatusController : ControllerBase
     }
 
     [HttpGet("healthy")]
-    public IActionResult SetHealthy()
+    public ActionResult<StatusApi> SetHealthy()
     {
         _healthy = true;
         _logger.LogInformation("Novo status = Healthy");
-        return Ok();
+        return GetCurrentStatusApplication();
     }
 
     [HttpGet("unhealthy")]
-    public IActionResult SetUnhealthy()
+    public ActionResult<StatusApi> SetUnhealthy()
     {
         _healthy = false;
         _logger.LogWarning("Novo status = Unhealthy");
-        return Ok();
+        return GetCurrentStatusApplication();
+    }
+
+    private StatusApi GetCurrentStatusApplication()
+    {
+        return new StatusApi
+        {
+            Producer = Environment.MachineName,
+            Healthy = _healthy,
+            Mensagem = _healthy ? "OK" : "Unhealthy"
+        };
     }
 }
